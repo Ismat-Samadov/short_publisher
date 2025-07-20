@@ -2425,13 +2425,6 @@ pytest tests/test_analyzer.py
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-## Contact
-
-- **Author**: Ismat Samadov
-- **Email**: [email]
-- **GitHub**: https://github.com/Ismat-Samadov
-- **Project Repository**: https://github.com/Ismat-Samadov/weather_analyse
-
 ---
 
 *Last Updated: July 2025*
