@@ -1,3 +1,12 @@
+https://opendata.az/search?category=%5B%22hidrometeorologiya%22%5D&query=%22%22&tag=%5B%5D&org=%5B%5D&resFormat=%5B%5D
+
+https://opendata.az/@@dsk/yagintinin-miqdari/r/9be6ba6c-83ce-42ff-95d7-0abff01f66dc
+
+https://opendata.az/@dsk/havanin-temperaturu
+
+
+https://opendata.az/@azerbaycan-respublikasinin-ekologiya-ve-tebii-servetler-nazirliyi/seher-merkezleri-uzre-cari-hava-melumatlari
+
 # Weather Analysis: Climate Change & Temperature Anomalies
 ## Comprehensive Project Documentation
 
