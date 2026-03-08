@@ -1,13 +1,13 @@
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const githubToken = process.env.GITHUB_TOKEN;
-  const githubRepo = process.env.GITHUB_REPO;
-  const workflowFile = process.env.GITHUB_WORKFLOW_FILE ?? 'publish.yml';
+  const githubToken = process.env.GH_TOKEN;
+  const githubRepo = process.env.GH_REPO;
+  const workflowFile = process.env.GH_WORKFLOW_FILE ?? 'publish.yml';
 
   if (!githubToken || !githubRepo) {
     return NextResponse.json(
-      { error: 'GITHUB_TOKEN and GITHUB_REPO env vars are required', runs: [] },
+      { error: 'GH_TOKEN and GH_REPO env vars are required', runs: [] },
       { status: 503 }
     );
   }

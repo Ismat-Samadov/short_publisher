@@ -124,7 +124,7 @@ export default function PipelinePage() {
         setTriggerResult({ ok: false, message: data.error ?? 'Failed to trigger pipeline.' });
       }
     } catch {
-      setTriggerResult({ ok: false, message: 'Network error. Check your GITHUB_TOKEN setting.' });
+      setTriggerResult({ ok: false, message: 'Network error. Check your GH_TOKEN setting.' });
     } finally {
       setTriggering(false);
     }
@@ -286,7 +286,7 @@ export default function PipelinePage() {
           <div className="px-6 py-12 text-center">
             <Info className="w-6 h-6 text-zinc-700 mx-auto mb-3" />
             <p className="text-sm text-zinc-500">Click "Load runs" to fetch workflow history from GitHub.</p>
-            <p className="text-xs text-zinc-700 mt-1">Requires GITHUB_TOKEN and repo settings.</p>
+            <p className="text-xs text-zinc-700 mt-1">Requires GH_TOKEN and repo settings.</p>
           </div>
         ) : loading ? (
           <div className="py-12 flex flex-col items-center gap-3">
@@ -298,7 +298,7 @@ export default function PipelinePage() {
             <PlayCircle className="w-8 h-8 text-zinc-700 mx-auto mb-3" />
             <p className="text-sm text-zinc-500">No workflow runs found.</p>
             <p className="text-xs text-zinc-700 mt-1">
-              Make sure GITHUB_TOKEN and repo settings are configured correctly.
+              Make sure GH_TOKEN and repo settings are configured correctly.
             </p>
           </div>
         ) : (

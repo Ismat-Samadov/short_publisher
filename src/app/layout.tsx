@@ -8,6 +8,7 @@ export const metadata: Metadata = {
     template: '%s · Short Publisher',
   },
   description: 'Autonomous YouTube Shorts publishing pipeline',
+  icons: { icon: '/favicon.svg' },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
