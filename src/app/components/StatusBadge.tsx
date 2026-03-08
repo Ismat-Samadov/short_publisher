@@ -78,7 +78,7 @@ export default function StatusBadge({ status, className, showDot = true }: Statu
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-xs font-medium border',
+        'inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md text-[11px] font-medium border',
         config.badge,
         className
       )}
