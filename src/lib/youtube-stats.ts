@@ -45,23 +45,46 @@ export interface ChannelStats {
 }
 
 export async function fetchVideoStats(youtubeId: string): Promise<VideoStats | null> {
-  const token = await getAccessToken();
-  const resp = await fetch(
-    `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${youtubeId}`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  const data = await resp.json();
-  const item = data.items?.[0];
-  if (!item) return null;
+  const stats = await fetchMultipleVideoStats([youtubeId]);
+  return stats.get(youtubeId) ?? null;
+}
 
-  const s = item.statistics;
-  return {
-    views:     parseInt(s.viewCount     ?? '0', 10),
-    likes:     parseInt(s.likeCount     ?? '0', 10),
-    comments:  parseInt(s.commentCount  ?? '0', 10),
-    favorites: parseInt(s.favoriteCount ?? '0', 10),
-    synced_at: new Date().toISOString(),
-  };
+/**
+ * Batch-fetch stats for multiple YouTube video IDs in a single API call.
+ * YouTube supports up to 50 IDs per request. Chunks automatically if needed.
+ * Uses a single access token for all requests.
+ */
+export async function fetchMultipleVideoStats(youtubeIds: string[]): Promise<Map<string, VideoStats>> {
+  if (youtubeIds.length === 0) return new Map();
+  const token = await getAccessToken();
+  const result = new Map<string, VideoStats>();
+  const now = new Date().toISOString();
+
+  // YouTube API allows up to 50 IDs per request
+  for (let i = 0; i < youtubeIds.length; i += 50) {
+    const chunk = youtubeIds.slice(i, i + 50);
+    const resp = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=statistics&id=${chunk.join(',')}`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!resp.ok) {
+      console.error('[fetchMultipleVideoStats] API error:', resp.status, await resp.text());
+      continue;
+    }
+    const data = await resp.json();
+    for (const item of data.items ?? []) {
+      const s = item.statistics ?? {};
+      result.set(item.id, {
+        views:     parseInt(s.viewCount     ?? '0', 10),
+        likes:     parseInt(s.likeCount     ?? '0', 10),
+        comments:  parseInt(s.commentCount  ?? '0', 10),
+        favorites: parseInt(s.favoriteCount ?? '0', 10),
+        synced_at: now,
+      });
+    }
+  }
+
+  return result;
 }
 
 export async function fetchChannelStats(): Promise<ChannelStats | null> {

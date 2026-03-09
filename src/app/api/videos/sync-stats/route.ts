@@ -7,7 +7,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db, videos } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { validateSession } from '@/lib/auth';
-import { fetchVideoStats, fetchChannelStats } from '@/lib/youtube-stats';
+import { fetchMultipleVideoStats, fetchChannelStats } from '@/lib/youtube-stats';
 
 export async function POST(req: NextRequest) {
   if (!validateSession(req)) {
@@ -31,23 +31,27 @@ export async function POST(req: NextRequest) {
       console.error('[sync-stats] Channel stats failed:', e);
     }
 
-    // Fetch per-video stats in parallel
-    const results = await Promise.allSettled(
-      withYtId.map(async (video) => {
-        const stats = await fetchVideoStats(video.youtube_id!);
-        if (!stats) return { id: video.id, ok: false };
+    // Fetch all video stats in a single batched API call (one token, up to 50 IDs per request)
+    const youtubeIds = withYtId.map((v) => v.youtube_id!);
+    const statsMap = await fetchMultipleVideoStats(youtubeIds);
 
+    // Persist stats for each video that got a result
+    await Promise.allSettled(
+      withYtId.map(async (video) => {
+        const stats = statsMap.get(video.youtube_id!);
+        if (!stats) {
+          console.warn(`[sync-stats] No stats returned for youtube_id=${video.youtube_id} (video ${video.id})`);
+          return;
+        }
         const existing = (video.metadata ?? {}) as Record<string, unknown>;
         await db
           .update(videos)
           .set({ metadata: { ...existing, engagement: stats } })
           .where(eq(videos.id, video.id));
-
-        return { id: video.id, ok: true, stats };
       })
     );
 
-    const synced = results.filter((r) => r.status === 'fulfilled' && (r.value as { ok: boolean }).ok).length;
+    const synced = statsMap.size;
 
     return NextResponse.json({
       synced,
