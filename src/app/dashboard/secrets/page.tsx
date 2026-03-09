@@ -156,6 +156,9 @@ function SecretInput({
           onChange={(e) => onChange(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && onSave()}
           placeholder={field.placeholder}
+          autoComplete="new-password"
+          data-1p-ignore
+          data-lpignore="true"
           className="w-full pr-9 py-2 pl-3 rounded-lg text-[12px] font-mono text-zinc-300 placeholder-zinc-700 outline-none transition-colors"
           style={{
             background: 'var(--surface-2)',
