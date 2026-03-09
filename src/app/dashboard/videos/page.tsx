@@ -197,9 +197,10 @@ export default function VideosPage() {
           <button
             onClick={fetchVideos}
             disabled={loading}
-            className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-all border border-transparent hover:border-zinc-700"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 transition-all disabled:opacity-50"
           >
-            <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin-slow')} />
+            <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin-slow')} />
+            Refresh
           </button>
           <button
             onClick={syncStats}

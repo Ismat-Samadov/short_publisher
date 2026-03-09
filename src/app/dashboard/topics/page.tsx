@@ -116,7 +116,7 @@ export default function TopicsPage() {
         <div className="w-px h-4 bg-zinc-800" />
         <div className="text-sm">
           <span className="text-emerald-400 font-semibold">{used}</span>
-          <span className="text-zinc-600 ml-1">published</span>
+          <span className="text-zinc-600 ml-1">used</span>
         </div>
       </div>
 

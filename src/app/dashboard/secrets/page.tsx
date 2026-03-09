@@ -246,18 +246,9 @@ export default function SecretsPage() {
           <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-widest mb-1">Configuration</div>
           <h1 className="text-[22px] font-bold text-zinc-100 tracking-tight">Secrets</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="text-[11px] text-zinc-500">
-            <span className="text-emerald-400 font-bold">{totalConfigured}</span>
-            <span className="text-zinc-600"> / {totalFields} configured</span>
-          </div>
-          <button
-            onClick={fetchSecrets}
-            disabled={loading}
-            className="p-2 text-zinc-600 hover:text-zinc-300 rounded-lg transition-colors"
-          >
-            <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin-slow')} />
-          </button>
+        <div className="text-[11px] text-zinc-500">
+          <span className="text-emerald-400 font-bold">{totalConfigured}</span>
+          <span className="text-zinc-600"> / {totalFields} configured</span>
         </div>
       </div>
 

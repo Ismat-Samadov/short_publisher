@@ -371,20 +371,11 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-zinc-100">Settings</h1>
-          <p className="text-zinc-500 text-sm mt-1">
-            Configure your pipeline, AI models, and publishing preferences
-          </p>
-        </div>
-        <button
-          onClick={fetchSettings}
-          disabled={loading}
-          className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg border border-transparent hover:border-zinc-700 transition-all"
-        >
-          <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin-slow')} />
-        </button>
+      <div>
+        <h1 className="text-2xl font-bold text-zinc-100">Settings</h1>
+        <p className="text-zinc-500 text-sm mt-1">
+          Configure your pipeline, AI models, and publishing preferences
+        </p>
       </div>
 
       {/* Note about secrets */}

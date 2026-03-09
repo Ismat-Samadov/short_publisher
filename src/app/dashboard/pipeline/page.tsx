@@ -150,15 +150,6 @@ export default function PipelinePage() {
         </div>
         <div className="flex items-center gap-2">
           <button
-            onClick={fetchRuns}
-            disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 transition-all disabled:opacity-40"
-            style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
-          >
-            <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin-slow')} />
-            Refresh
-          </button>
-          <button
             onClick={() => triggerRun(true)}
             disabled={triggering}
             className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-zinc-400 hover:text-zinc-200 transition-all disabled:opacity-40"
