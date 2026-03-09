@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
       const thumbnailUrl = thumbnail_r2_key ? getR2Url(thumbnail_r2_key) : undefined;
       const notifs: Promise<unknown>[] = [];
       if (flag('notify_on_success')) notifs.push(sendVideoPublished(title, youtube_url, thumbnailUrl));
-      if (flag('email_on_publish')) notifs.push(sendVideoPublishedEmail(title, youtube_url, duration_seconds, topicRow?.niche ?? undefined));
+      if (flag('email_on_publish')) notifs.push(sendVideoPublishedEmail(title, youtube_url, duration_seconds ?? undefined, topicRow?.niche ?? undefined));
       if (notifs.length) {
         await Promise.allSettled(notifs).then((results) =>
           results.forEach((r) => { if (r.status === 'rejected') console.error('[Notify] Error:', r.reason); })
