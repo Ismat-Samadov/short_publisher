@@ -154,11 +154,12 @@ def step_generate_audio(script: dict, work_dir: str) -> tuple[str, list[dict], f
     return audio_path, word_timestamps, duration, audio_usage
 
 
-def step_generate_clips(script: dict, work_dir: str) -> list[str]:
+def step_generate_clips(script: dict, work_dir: str) -> tuple[list[str], int]:
     _log("4/8", "Generating cinematic clips (Kling 2.5 Pro via fal.ai)")
     clips_dir = str(Path(work_dir) / "clips")
     prompts = [seg["visual_prompt"] for seg in script["segments"]]
-    return generate_video_clips(prompts, clips_dir)
+    clip_paths = generate_video_clips(prompts, clips_dir)
+    return clip_paths, len(prompts)  # return attempted count for accurate billing
 
 
 def step_fetch_bg_music(work_dir: str) -> Optional[str]:
@@ -343,7 +344,7 @@ def main() -> None:
         duration = int(audio_duration)
 
         current_step = "generate-clips"
-        clip_paths = step_generate_clips(script, work_dir)
+        clip_paths, clips_attempted = step_generate_clips(script, work_dir)
 
         bg_music = step_fetch_bg_music(work_dir)
 
@@ -360,7 +361,8 @@ def main() -> None:
         current_step = "report"
         # Build cost breakdown
         script_usage = script.get("_usage", {})
-        kling_cost = len(clip_paths) * 0.70  # $0.07/s × 10s × N clips
+        # Bill on attempted clips (fal.ai charges even for failed generations)
+        kling_cost = clips_attempted * 0.70  # $0.07/s × 10s × N attempted
         total_cost = (
             script_usage.get("claude_cost_usd", 0)
             + audio_usage.get("elevenlabs_cost_usd", 0)
@@ -377,7 +379,8 @@ def main() -> None:
                 "cost_usd": audio_usage.get("elevenlabs_cost_usd", 0),
             },
             "kling": {
-                "clips": len(clip_paths),
+                "clips": clips_attempted,
+                "clips_ok": len(clip_paths),
                 "cost_usd": round(kling_cost, 4),
             },
             "total_usd": round(total_cost, 4),
@@ -385,7 +388,7 @@ def main() -> None:
         print(f"\n  Cost breakdown:")
         print(f"    Claude     : ${script_usage.get('claude_cost_usd', 0):.4f}")
         print(f"    ElevenLabs : ${audio_usage.get('elevenlabs_cost_usd', 0):.4f}")
-        print(f"    Kling      : ${kling_cost:.4f} ({len(clip_paths)} clips)")
+        print(f"    Kling      : ${kling_cost:.4f} ({clips_attempted} attempted, {len(clip_paths)} ok)")
         print(f"    Total      : ${total_cost:.4f}")
         step_report(topic, script, youtube_id, r2_key, duration, "published", cost_metadata=cost_metadata)
 
