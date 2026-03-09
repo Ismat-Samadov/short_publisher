@@ -116,7 +116,7 @@ export default async function DashboardPage() {
   return (
     <div className="space-y-7 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[11px] font-medium text-zinc-600 uppercase tracking-widest">Overview</span>

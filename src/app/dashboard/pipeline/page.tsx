@@ -143,7 +143,7 @@ export default function PipelinePage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <div className="text-[11px] font-medium text-zinc-600 uppercase tracking-widest mb-1">Automation</div>
           <h1 className="text-[22px] font-bold text-zinc-100 tracking-tight">Pipeline</h1>
@@ -192,7 +192,7 @@ export default function PipelinePage() {
       )}
 
       {/* Info cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {[
           {
             icon: Calendar, iconColor: 'text-violet-400',
@@ -311,7 +311,8 @@ export default function PipelinePage() {
             <p className="text-xs text-zinc-700 mt-1">Check GH_TOKEN and GH_REPO configuration.</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[560px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 {['Run', 'Status', 'Trigger', 'Duration', 'Started', ''].map((h) => (
@@ -370,6 +371,7 @@ export default function PipelinePage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

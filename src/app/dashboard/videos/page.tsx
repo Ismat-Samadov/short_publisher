@@ -185,7 +185,7 @@ export default function VideosPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Videos</h1>
           <p className="text-zinc-500 text-sm mt-1">Complete history of all generated videos</p>
@@ -216,7 +216,7 @@ export default function VideosPage() {
       </div>
 
       {/* Stats row */}
-      <div className="flex items-center gap-4 flex-wrap">
+      <div className="flex items-center gap-4 flex-wrap justify-between">
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span><span className="text-emerald-400 font-semibold">{publishedCount}</span> published</span>
           <span className="text-zinc-800">·</span>
@@ -237,7 +237,7 @@ export default function VideosPage() {
 
         {/* Channel stats chip */}
         {channelStats && (
-          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-xs border ml-auto"
+          <div className="flex items-center gap-3 px-3 py-1.5 rounded-lg text-xs border"
             style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}>
             <span className="flex items-center gap-1 text-zinc-400">
               <Users className="w-3 h-3 text-red-400" />
@@ -266,7 +266,8 @@ export default function VideosPage() {
             <p className="text-xs text-zinc-700">The pipeline will create videos automatically once topics are added.</p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[700px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 {['Video', 'Status', 'Duration', 'Cost', 'Engagement', 'YouTube', 'Published'].map((h) => (
@@ -336,6 +337,7 @@ export default function VideosPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

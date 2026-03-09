@@ -325,7 +325,7 @@ export default function SettingsPage() {
             <select
               value={value}
               onChange={(e) => handleChange(field.key, e.target.value)}
-              className="w-full max-w-xs text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
+              className="w-full sm:max-w-xs text-sm rounded-lg px-3 py-2 focus:outline-none focus:ring-1 focus:ring-violet-500/50 transition-colors"
               style={{
                 background: 'var(--bg)',
                 border: '1px solid var(--border)',
@@ -429,7 +429,7 @@ export default function SettingsPage() {
                   {testResult.message}
                 </div>
               )}
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 {([
                   { type: 'email_publish' as TestType, label: 'Email: Published', icon: Mail, color: 'text-emerald-400' },
                   { type: 'email_error' as TestType, label: 'Email: Error', icon: Mail, color: 'text-red-400' },

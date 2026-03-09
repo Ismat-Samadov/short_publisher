@@ -13,6 +13,7 @@ import {
   LogOut,
   Radio,
   KeyRound,
+  HardDrive,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -36,6 +37,12 @@ const navSections = [
       { href: '/dashboard/pipeline', label: 'Pipeline', icon: PlayCircle, exact: false },
       { href: '/dashboard/settings', label: 'Settings', icon: Settings, exact: false },
       { href: '/dashboard/secrets', label: 'Secrets', icon: KeyRound, exact: false },
+    ],
+  },
+  {
+    label: 'Infrastructure',
+    items: [
+      { href: '/dashboard/storage', label: 'Storage', icon: HardDrive, exact: false },
     ],
   },
 ];
@@ -90,7 +97,7 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed left-0 top-0 h-full w-[220px] flex flex-col z-20"
+      className="hidden lg:flex fixed left-0 top-0 h-full w-[220px] flex-col z-20"
       style={{
         background: 'var(--surface)',
         borderRight: '1px solid var(--border)',

@@ -78,7 +78,7 @@ export default function TopicsPage() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-start justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-100">Topics</h1>
           <p className="text-zinc-500 text-sm mt-1">
@@ -88,9 +88,11 @@ export default function TopicsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={fetchTopics}
-            className="p-2 text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 rounded-lg transition-all border border-transparent hover:border-zinc-700"
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 border border-zinc-700 hover:border-zinc-600 hover:bg-zinc-800 transition-all disabled:opacity-50"
           >
-            <RefreshCw className={cn('w-4 h-4', loading && 'animate-spin-slow')} />
+            <RefreshCw className={cn('w-3.5 h-3.5', loading && 'animate-spin-slow')} />
+            Refresh
           </button>
           <button
             onClick={() => setShowForm((v) => !v)}
@@ -170,7 +172,8 @@ export default function TopicsPage() {
             </p>
           </div>
         ) : (
-          <table className="w-full">
+          <div className="overflow-x-auto">
+          <table className="w-full min-w-[640px]">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
                 {['Topic', 'Niche', 'Keywords', 'Status', 'Priority', 'Created', ''].map((h) => (
@@ -286,6 +289,7 @@ export default function TopicsPage() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </div>
     </div>

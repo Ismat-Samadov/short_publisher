@@ -93,10 +93,25 @@ if (token) {
 }
 
 for (const video of videos) {
-  console.log(`\nVideo: ${video.title}`);
-  const cost = KNOWN_COSTS[video.id] ?? {};
-  let engagement = null;
+  console.log(`\nVideo [${video.id}]: ${video.title}`);
 
+  // Start from existing DB metadata so pipeline-saved costs are not lost.
+  // KNOWN_COSTS entries override (for backfilling manually verified costs).
+  const existing = video.metadata ?? {};
+  const knownCost = KNOWN_COSTS[video.id];
+  const costBase = knownCost
+    ? { ...existing, ...knownCost }   // override with verified cost data
+    : existing;                        // preserve whatever pipeline already saved
+
+  if (knownCost) {
+    console.log(`  Using KNOWN_COSTS override — total=$${knownCost.total_usd}`);
+  } else if (existing.total_usd) {
+    console.log(`  Keeping pipeline-saved cost — total=$${existing.total_usd}`);
+  } else {
+    console.log(`  No cost data (add to KNOWN_COSTS if needed)`);
+  }
+
+  let engagement = null;
   const realYtId = video.youtube_id && video.youtube_id !== 'dry_run_id' ? video.youtube_id : null;
 
   if (realYtId && token) {
@@ -123,9 +138,9 @@ for (const video of videos) {
   }
 
   const metadata = {
-    ...cost,
-    ...(engagement    ? { engagement }              : {}),
-    ...(channelStats  ? { channel: channelStats }   : {}),
+    ...costBase,
+    ...(engagement   ? { engagement }            : {}),
+    ...(channelStats ? { channel: channelStats } : {}),
   };
 
   await sql`UPDATE shortgen.videos SET metadata = ${JSON.stringify(metadata)}::jsonb WHERE id = ${video.id}`;
