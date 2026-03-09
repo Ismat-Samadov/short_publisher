@@ -6,7 +6,6 @@ import {
   RefreshCw,
   Calendar,
   Mic,
-  Image,
   Youtube,
   MessageSquare,
   Brain,
@@ -71,7 +70,7 @@ const sections: SettingSection[] = [
   {
     id: 'content',
     title: 'Content',
-    description: 'Default content settings for generated videos',
+    description: 'Script and video content settings passed to the pipeline',
     icon: Brain,
     color: 'text-blue-400',
     fields: [
@@ -90,15 +89,6 @@ const sections: SettingSection[] = [
         description: 'Target video length (30–60 seconds recommended for Shorts)',
       },
       {
-        key: 'video_style',
-        label: 'Video style',
-        type: 'select',
-        options: [
-          { value: 'stock-images', label: 'Stock images + voiceover' },
-          { value: 'slideshow', label: 'Slideshow (text + images)' },
-        ],
-      },
-      {
         key: 'script_tone',
         label: 'Script tone',
         type: 'select',
@@ -108,44 +98,13 @@ const sections: SettingSection[] = [
           { value: 'motivational', label: 'Motivational' },
           { value: 'news', label: 'News / Informational' },
         ],
-      },
-    ],
-  },
-  {
-    id: 'ai',
-    title: 'AI Models',
-    description: 'Configure which AI models and voices to use',
-    icon: Brain,
-    color: 'text-indigo-400',
-    fields: [
-      {
-        key: 'script_model',
-        label: 'Script model',
-        type: 'select',
-        options: [
-          { value: 'gpt-4o-mini', label: 'GPT-4o mini (recommended, cheap)' },
-          { value: 'gpt-4o', label: 'GPT-4o (better quality, higher cost)' },
-          { value: 'claude-haiku-4-5', label: 'Claude Haiku (cheapest)' },
-        ],
+        description: 'Writing style and tone applied by Claude when generating scripts',
       },
       {
-        key: 'tts_provider',
-        label: 'TTS provider',
-        type: 'select',
-        options: [
-          { value: 'elevenlabs', label: 'ElevenLabs (primary)' },
-          { value: 'openai', label: 'OpenAI TTS (fallback)' },
-        ],
-      },
-      {
-        key: 'image_source',
-        label: 'Image source',
-        type: 'select',
-        options: [
-          { value: 'pexels', label: 'Pexels (free stock)' },
-          { value: 'dalle', label: 'DALL-E 3 (AI-generated, paid)' },
-          { value: 'pexels+dalle', label: 'Pexels with DALL-E fallback' },
-        ],
+        key: 'captions_enabled',
+        label: 'Burned-in captions',
+        type: 'toggle',
+        description: 'Overlay word-by-word captions on the final video (uses ElevenLabs timestamps)',
       },
     ],
   },
@@ -188,7 +147,7 @@ const sections: SettingSection[] = [
   {
     id: 'tts',
     title: 'Voice',
-    description: 'Text-to-speech voice configuration',
+    description: 'ElevenLabs voice configuration',
     icon: Mic,
     color: 'text-emerald-400',
     fields: [
@@ -197,59 +156,7 @@ const sections: SettingSection[] = [
         label: 'ElevenLabs voice ID',
         type: 'text',
         placeholder: 'EXAVITQu4vr4xnSDxMaL',
-        description: 'Get voice IDs from your ElevenLabs dashboard',
-      },
-      {
-        key: 'openai_tts_voice',
-        label: 'OpenAI TTS voice',
-        type: 'select',
-        options: [
-          { value: 'alloy', label: 'Alloy (neutral)' },
-          { value: 'echo', label: 'Echo (male)' },
-          { value: 'fable', label: 'Fable (warm)' },
-          { value: 'onyx', label: 'Onyx (deep)' },
-          { value: 'nova', label: 'Nova (female)' },
-          { value: 'shimmer', label: 'Shimmer (expressive)' },
-        ],
-      },
-      {
-        key: 'speech_speed',
-        label: 'Speech speed',
-        type: 'select',
-        options: [
-          { value: '0.9', label: '0.9× (slower)' },
-          { value: '1.0', label: '1.0× (normal)' },
-          { value: '1.1', label: '1.1× (slightly faster)' },
-          { value: '1.2', label: '1.2× (faster)' },
-        ],
-      },
-    ],
-  },
-  {
-    id: 'visuals',
-    title: 'Visuals',
-    description: 'Image and video assembly settings',
-    icon: Image,
-    color: 'text-cyan-400',
-    fields: [
-      {
-        key: 'images_per_video',
-        label: 'Images per video',
-        type: 'number',
-        placeholder: '6',
-        description: 'Number of stock images to use in each video',
-      },
-      {
-        key: 'ken_burns_enabled',
-        label: 'Ken Burns effect',
-        type: 'toggle',
-        description: 'Slow zoom/pan effect on images (more dynamic look)',
-      },
-      {
-        key: 'captions_enabled',
-        label: 'Auto-captions',
-        type: 'toggle',
-        description: 'Add auto-generated captions using Whisper',
+        description: 'Overrides the ELEVENLABS_VOICE_ID secret. Find voice IDs in your ElevenLabs dashboard.',
       },
     ],
   },
@@ -505,12 +412,11 @@ export default function SettingsPage() {
         className="flex items-start gap-3 px-4 py-3 rounded-lg border text-sm"
         style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
       >
-        <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+        <AlertCircle className="w-4 h-4 text-blue-400 flex-shrink-0 mt-0.5" />
         <div className="text-xs text-zinc-500">
-          <span className="text-amber-300 font-medium">API keys and secrets</span> (OpenAI, ElevenLabs, YouTube, Telegram tokens) must be set as{' '}
-          <strong className="text-zinc-400">GitHub Actions Secrets</strong> and{' '}
-          <strong className="text-zinc-400">.env.local</strong> variables — not stored here.
-          These settings control pipeline behavior, not credentials.
+          <span className="text-blue-300 font-medium">API keys and tokens</span> (Anthropic, ElevenLabs, YouTube, Telegram, etc.) are managed in the{' '}
+          <a href="/dashboard/secrets" className="text-violet-400 hover:text-violet-300 underline underline-offset-2">Secrets</a> page.
+          These settings control pipeline <strong className="text-zinc-400">behavior</strong>, not credentials.
         </div>
       </div>
 
