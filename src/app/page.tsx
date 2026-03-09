@@ -72,26 +72,68 @@ const features = [
 
 // ── Tech stack ────────────────────────────────────────────────────────────────
 
-const stack = [
-  { label: 'Claude Sonnet', color: '#a78bfa' },
-  { label: 'ElevenLabs', color: '#60a5fa' },
-  { label: 'Kling 2.6 Pro', color: '#34d399' },
-  { label: 'fal.ai', color: '#fbbf24' },
-  { label: 'FFmpeg', color: '#f97316' },
-  { label: 'YouTube API', color: '#f87171' },
-  { label: 'Cloudflare R2', color: '#fb923c' },
-  { label: 'NeonDB', color: '#4ade80' },
-  { label: 'GitHub Actions', color: '#818cf8' },
-  { label: 'Next.js 15', color: '#e4e4e7' },
+const stackGroups = [
+  {
+    label: 'AI & Generation',
+    color: '#a78bfa',
+    items: [
+      { label: 'Claude Sonnet 4.6',  href: 'https://anthropic.com',      color: '#a78bfa' },
+      { label: 'ElevenLabs',         href: 'https://elevenlabs.io',       color: '#60a5fa' },
+      { label: 'Kling 2.6 Pro',      href: 'https://klingai.com',         color: '#34d399' },
+      { label: 'fal.ai',             href: 'https://fal.ai',              color: '#fbbf24' },
+    ],
+  },
+  {
+    label: 'Media & Publishing',
+    color: '#f87171',
+    items: [
+      { label: 'FFmpeg',             href: 'https://ffmpeg.org',                            color: '#f97316' },
+      { label: 'YouTube Data API v3',href: 'https://developers.google.com/youtube/v3',      color: '#f87171' },
+      { label: 'Telegram Bot API',   href: 'https://core.telegram.org/bots/api',            color: '#38bdf8' },
+      { label: 'Resend',             href: 'https://resend.com',                            color: '#fb7185' },
+    ],
+  },
+  {
+    label: 'Infrastructure',
+    color: '#fb923c',
+    items: [
+      { label: 'Cloudflare R2',      href: 'https://developers.cloudflare.com/r2',          color: '#fb923c' },
+      { label: 'NeonDB',             href: 'https://neon.tech',                             color: '#4ade80' },
+      { label: 'GitHub Actions',     href: 'https://github.com/features/actions',           color: '#818cf8' },
+      { label: 'AWS S3 SDK v3',      href: 'https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/', color: '#f59e0b' },
+    ],
+  },
+  {
+    label: 'Frontend & DX',
+    color: '#e4e4e7',
+    items: [
+      { label: 'Next.js 16',         href: 'https://nextjs.org',          color: '#e4e4e7' },
+      { label: 'React 19',           href: 'https://react.dev',           color: '#38bdf8' },
+      { label: 'TypeScript 5',       href: 'https://typescriptlang.org',  color: '#60a5fa' },
+      { label: 'Tailwind CSS',       href: 'https://tailwindcss.com',     color: '#34d399' },
+    ],
+  },
+  {
+    label: 'Data & Validation',
+    color: '#4ade80',
+    items: [
+      { label: 'Drizzle ORM',        href: 'https://orm.drizzle.team',    color: '#a3e635' },
+      { label: 'Zod',                href: 'https://zod.dev',             color: '#818cf8' },
+      { label: 'PostgreSQL',         href: 'https://postgresql.org',      color: '#60a5fa' },
+      { label: 'date-fns',           href: 'https://date-fns.org',        color: '#94a3b8' },
+    ],
+  },
 ];
+
+const totalTools = stackGroups.reduce((s, g) => s + g.items.length, 0);
 
 // ── Stats ─────────────────────────────────────────────────────────────────────
 
 const stats = [
-  { value: '~8 min', label: 'Pipeline runtime', sub: 'script to published Short' },
-  { value: '~$4', label: 'Cost per video', sub: '3 clips, voices & AI included' },
-  { value: '100%', label: 'Automated', sub: 'zero manual steps required' },
-  { value: '250×', label: 'Runs / month', sub: 'on GitHub Actions free tier' },
+  { value: '~8 min', label: 'Pipeline runtime', sub: 'idea to published Short' },
+  { value: '25×',    label: 'Faster than manual', sub: 'vs ~3.5 hrs of human editing' },
+  { value: '~$4',    label: 'Cost per video', sub: 'AI + voice + clips + hosting' },
+  { value: '250×',   label: 'Runs / month free', sub: 'GitHub Actions free tier' },
 ];
 
 // ─────────────────────────────────────────────────────────────────────────────
