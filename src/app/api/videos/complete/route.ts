@@ -3,6 +3,7 @@ import { db, videos, topics } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { validatePipelineKey } from '@/lib/auth';
 import { sendVideoPublished, sendPipelineError } from '@/lib/telegram';
+import { sendVideoPublishedEmail, sendPipelineErrorEmail } from '@/lib/email';
 import { getR2Url } from '@/lib/r2';
 import { z } from 'zod';
 
@@ -73,15 +74,28 @@ export async function POST(req: NextRequest) {
       .set({ status: topicStatus, updated_at: new Date() })
       .where(eq(topics.id, topic_id));
 
-    // Send Telegram notifications
+    // Fetch topic for additional context in notifications
+    const [topicRow] = await db.select().from(topics).where(eq(topics.id, topic_id));
+
+    // Send notifications (Telegram + Email) in parallel — failures are non-fatal
     if (status === 'published' && youtube_url && title) {
       const thumbnailUrl = thumbnail_r2_key ? getR2Url(thumbnail_r2_key) : undefined;
-      await sendVideoPublished(title, youtube_url, thumbnailUrl).catch((err) =>
-        console.error('[Telegram] Failed to send publish notification:', err)
+      await Promise.allSettled([
+        sendVideoPublished(title, youtube_url, thumbnailUrl),
+        sendVideoPublishedEmail(title, youtube_url, duration_seconds, topicRow?.niche ?? undefined),
+      ]).then((results) =>
+        results.forEach((r) => {
+          if (r.status === 'rejected') console.error('[Notify] Error:', r.reason);
+        })
       );
     } else if (status === 'failed' && error_message) {
-      await sendPipelineError('video-pipeline', error_message).catch((err) =>
-        console.error('[Telegram] Failed to send error notification:', err)
+      await Promise.allSettled([
+        sendPipelineError('video-pipeline', error_message),
+        sendPipelineErrorEmail('video-pipeline', error_message, topicRow?.title ?? undefined),
+      ]).then((results) =>
+        results.forEach((r) => {
+          if (r.status === 'rejected') console.error('[Notify] Error:', r.reason);
+        })
       );
     }
 

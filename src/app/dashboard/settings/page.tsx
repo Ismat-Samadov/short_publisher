@@ -14,6 +14,9 @@ import {
   ChevronRight,
   CheckCircle2,
   AlertCircle,
+  Mail,
+  Send,
+  Zap,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -252,7 +255,7 @@ const sections: SettingSection[] = [
   },
   {
     id: 'telegram',
-    title: 'Notifications',
+    title: 'Telegram',
     description: 'Telegram bot notification preferences',
     icon: MessageSquare,
     color: 'text-blue-400',
@@ -277,7 +280,36 @@ const sections: SettingSection[] = [
       },
     ],
   },
+  {
+    id: 'email',
+    title: 'Email',
+    description: 'Resend email notification preferences',
+    icon: Mail,
+    color: 'text-violet-400',
+    fields: [
+      {
+        key: 'email_on_publish',
+        label: 'Email on publish',
+        type: 'toggle',
+        description: 'Send an email when a video is successfully published to YouTube',
+      },
+      {
+        key: 'email_on_failure',
+        label: 'Email on failure',
+        type: 'toggle',
+        description: 'Send an email alert when the pipeline encounters an error',
+      },
+      {
+        key: 'email_daily_digest',
+        label: 'Daily digest',
+        type: 'toggle',
+        description: 'Receive a daily summary of pipeline activity each morning',
+      },
+    ],
+  },
 ];
+
+type TestType = 'email_publish' | 'email_error' | 'email_digest' | 'telegram';
 
 export default function SettingsPage() {
   const [values, setValues] = useState<Record<string, string>>({});
@@ -285,6 +317,8 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState<string | null>(null);
   const [saveResult, setSaveResult] = useState<Record<string, boolean>>({});
   const [expanded, setExpanded] = useState<string[]>(['schedule', 'content']);
+  const [testing, setTesting] = useState<TestType | null>(null);
+  const [testResult, setTestResult] = useState<{ type: TestType; ok: boolean; message: string } | null>(null);
 
   const fetchSettings = useCallback(async () => {
     setLoading(true);
@@ -316,6 +350,29 @@ export default function SettingsPage() {
   function toggleBool(key: string) {
     const current = values[key] === 'true';
     handleChange(key, String(!current));
+  }
+
+  async function sendTestNotification(type: TestType) {
+    setTesting(type);
+    setTestResult(null);
+    try {
+      const res = await fetch('/api/notifications/test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ type }),
+      });
+      const data = await res.json();
+      setTestResult({
+        type,
+        ok: res.ok,
+        message: res.ok ? 'Test sent — check your inbox / Telegram.' : (data.error ?? 'Failed to send.'),
+      });
+    } catch {
+      setTestResult({ type, ok: false, message: 'Network error.' });
+    } finally {
+      setTesting(null);
+      setTimeout(() => setTestResult(null), 6000);
+    }
   }
 
   async function saveSection(section: SettingSection) {
@@ -464,6 +521,60 @@ export default function SettingsPage() {
         </div>
       ) : (
         <div className="space-y-3">
+          {/* Test Notifications */}
+          <div
+            className="rounded-xl border overflow-hidden"
+            style={{ background: 'var(--surface)', borderColor: 'var(--border)' }}
+          >
+            <div className="flex items-center gap-4 px-6 py-4" style={{ borderBottom: '1px solid var(--border)' }}>
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                <Send className="w-4 h-4 text-violet-400" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-zinc-200">Test Notifications</div>
+                <div className="text-xs text-zinc-600 mt-0.5">Send a test message to verify email and Telegram are configured</div>
+              </div>
+            </div>
+            <div className="px-6 py-5">
+              {testResult && (
+                <div
+                  className={cn(
+                    'flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs mb-4 border',
+                    testResult.ok
+                      ? 'text-emerald-300 border-emerald-800/50'
+                      : 'text-red-300 border-red-800/50'
+                  )}
+                  style={{ background: testResult.ok ? 'rgba(16,185,129,0.06)' : 'rgba(239,68,68,0.06)' }}
+                >
+                  {testResult.ok
+                    ? <CheckCircle2 className="w-3.5 h-3.5 flex-shrink-0" />
+                    : <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />}
+                  {testResult.message}
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-2">
+                {([
+                  { type: 'email_publish' as TestType, label: 'Email: Published', icon: Mail, color: 'text-emerald-400' },
+                  { type: 'email_error' as TestType, label: 'Email: Error', icon: Mail, color: 'text-red-400' },
+                  { type: 'email_digest' as TestType, label: 'Email: Digest', icon: Mail, color: 'text-violet-400' },
+                  { type: 'telegram' as TestType, label: 'Telegram', icon: Zap, color: 'text-blue-400' },
+                ]).map(({ type, label, icon: Icon, color }) => (
+                  <button
+                    key={type}
+                    onClick={() => sendTestNotification(type)}
+                    disabled={testing !== null}
+                    className="flex items-center gap-2 px-3 py-2.5 rounded-lg text-xs font-medium text-zinc-400 hover:text-zinc-200 hover:bg-white/[0.04] border border-zinc-800 hover:border-zinc-700 transition-all disabled:opacity-40"
+                  >
+                    {testing === type
+                      ? <RefreshCw className="w-3.5 h-3.5 animate-spin-slow" />
+                      : <Icon className={cn('w-3.5 h-3.5', color)} />}
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
           {sections.map((section) => {
             const isOpen = expanded.includes(section.id);
             const isSaving = saving === section.id;
