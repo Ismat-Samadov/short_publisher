@@ -4,7 +4,7 @@ import { db, videos, topics } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { formatDistanceToNow, format } from 'date-fns';
 import StatusBadge from '../../components/StatusBadge';
-import { ExternalLink, Clock, Film, AlertCircle } from 'lucide-react';
+import { ExternalLink, Clock, Film, AlertCircle, DollarSign } from 'lucide-react';
 
 async function getAllVideos() {
   return db
@@ -19,6 +19,60 @@ function formatDuration(seconds: number | null): string {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
   return `${mins}:${String(secs).padStart(2, '0')}`;
+}
+
+interface CostMeta {
+  total_usd?: number;
+  claude?: { cost_usd?: number; input_tokens?: number; output_tokens?: number };
+  elevenlabs?: { cost_usd?: number; chars?: number };
+  kling?: { cost_usd?: number; clips?: number };
+}
+
+function CostCell({ metadata }: { metadata: unknown }) {
+  const cost = metadata as CostMeta | null;
+  if (!cost?.total_usd) return <span className="text-xs text-zinc-700">—</span>;
+  return (
+    <div className="group relative inline-block">
+      <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-400 cursor-default">
+        <DollarSign className="w-3 h-3" />
+        {cost.total_usd.toFixed(2)}
+      </span>
+      {/* Breakdown tooltip */}
+      <div className="absolute bottom-full left-0 mb-2 hidden group-hover:block z-10 w-44">
+        <div
+          className="rounded-lg p-2.5 text-[10px] space-y-1 shadow-xl"
+          style={{ background: '#18181b', border: '1px solid #27272a' }}
+        >
+          <div className="flex justify-between text-zinc-400">
+            <span>Claude</span>
+            <span>${cost.claude?.cost_usd?.toFixed(4) ?? '—'}</span>
+          </div>
+          {cost.claude?.input_tokens && (
+            <div className="flex justify-between text-zinc-600 pl-2">
+              <span>{cost.claude.input_tokens}↑ / {cost.claude.output_tokens}↓ tok</span>
+            </div>
+          )}
+          <div className="flex justify-between text-zinc-400">
+            <span>ElevenLabs</span>
+            <span>${cost.elevenlabs?.cost_usd?.toFixed(4) ?? '—'}</span>
+          </div>
+          {cost.elevenlabs?.chars && (
+            <div className="flex justify-between text-zinc-600 pl-2">
+              <span>{cost.elevenlabs.chars} chars</span>
+            </div>
+          )}
+          <div className="flex justify-between text-zinc-400">
+            <span>Kling ({cost.kling?.clips ?? 0} clips)</span>
+            <span>${cost.kling?.cost_usd?.toFixed(4) ?? '—'}</span>
+          </div>
+          <div className="flex justify-between text-zinc-200 font-semibold border-t pt-1" style={{ borderColor: '#27272a' }}>
+            <span>Total</span>
+            <span>${cost.total_usd.toFixed(4)}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 function VideoThumb({ status }: { status: string }) {
@@ -55,6 +109,10 @@ export default async function VideosPage() {
   const activeCount = allVideos.filter(
     ({ video }) => video.status === 'generating' || video.status === 'uploading'
   ).length;
+  const totalSpent = allVideos.reduce((sum, { video }) => {
+    const cost = video.metadata as { total_usd?: number } | null;
+    return sum + (cost?.total_usd ?? 0);
+  }, 0);
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -77,6 +135,16 @@ export default async function VideosPage() {
             <span><span className="text-red-400 font-semibold">{failedCount}</span> failed</span>
             <span className="text-zinc-800">·</span>
             <span><span className="text-zinc-300 font-semibold">{allVideos.length}</span> total</span>
+            {totalSpent > 0 && (
+              <>
+                <span className="text-zinc-800">·</span>
+                <span className="flex items-center gap-1">
+                  <DollarSign className="w-3 h-3 text-emerald-500" />
+                  <span className="text-emerald-400 font-semibold">{totalSpent.toFixed(2)}</span>
+                  <span>spent</span>
+                </span>
+              </>
+            )}
           </div>
         </div>
       </div>
@@ -98,7 +166,7 @@ export default async function VideosPage() {
           <table className="w-full">
             <thead>
               <tr style={{ borderBottom: '1px solid var(--border)' }}>
-                {['Video', 'Status', 'Duration', 'YouTube', 'Created', 'Published'].map((h) => (
+                {['Video', 'Status', 'Duration', 'Cost', 'YouTube', 'Created', 'Published'].map((h) => (
                   <th
                     key={h}
                     className="text-left text-[11px] font-medium text-zinc-600 uppercase tracking-wider px-5 py-3"
@@ -147,6 +215,11 @@ export default async function VideosPage() {
                       <Clock className="w-3 h-3" />
                       {formatDuration(video.duration_seconds)}
                     </span>
+                  </td>
+
+                  {/* Cost */}
+                  <td className="px-5 py-3.5">
+                    <CostCell metadata={video.metadata} />
                   </td>
 
                   {/* YouTube */}

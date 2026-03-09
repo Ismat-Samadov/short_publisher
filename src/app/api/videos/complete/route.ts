@@ -18,6 +18,7 @@ const completeSchema = z.object({
   duration_seconds: z.number().int().nullish(),
   status: z.enum(['published', 'failed']),
   error_message: z.string().nullish(),
+  metadata: z.record(z.unknown()).nullish(),
 });
 
 export async function POST(req: NextRequest) {
@@ -47,6 +48,7 @@ export async function POST(req: NextRequest) {
       duration_seconds,
       status,
       error_message,
+      metadata,
     } = parsed.data;
 
     // Create video record
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
         duration_seconds: duration_seconds ?? null,
         status,
         error_message: error_message ?? null,
+        metadata: metadata ?? null,
         published_at: status === 'published' ? new Date() : null,
       })
       .returning();

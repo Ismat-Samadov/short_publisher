@@ -117,8 +117,19 @@ Write the script now. Return only valid JSON."""
     if not result["segments"]:
         raise ValueError("Script produced no segments")
 
+    # Claude Sonnet 4.6: $3/MTok input, $15/MTok output
+    input_tokens = message.usage.input_tokens
+    output_tokens = message.usage.output_tokens
+    claude_cost = (input_tokens * 3 + output_tokens * 15) / 1_000_000
+
     print(f"  Title    : {result['title']}")
     print(f"  Segments : {len(result['segments'])}")
     print(f"  Words    : {len(result['script'].split())}")
+    print(f"  Tokens   : {input_tokens} in / {output_tokens} out (${claude_cost:.4f})")
 
+    result["_usage"] = {
+        "input_tokens": input_tokens,
+        "output_tokens": output_tokens,
+        "claude_cost_usd": round(claude_cost, 6),
+    }
     return result

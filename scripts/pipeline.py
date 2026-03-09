@@ -147,11 +147,11 @@ def step_generate_script(topic: Topic) -> dict:
     )
 
 
-def step_generate_audio(script: dict, work_dir: str) -> tuple[str, list[dict], float]:
+def step_generate_audio(script: dict, work_dir: str) -> tuple[str, list[dict], float, dict]:
     _log("3/8", "Generating voiceover (ElevenLabs)")
     audio_path = str(Path(work_dir) / "audio.mp3")
-    word_timestamps, duration = generate_audio(script["script"], audio_path)
-    return audio_path, word_timestamps, duration
+    word_timestamps, duration, audio_usage = generate_audio(script["script"], audio_path)
+    return audio_path, word_timestamps, duration, audio_usage
 
 
 def step_generate_clips(script: dict, work_dir: str) -> list[str]:
@@ -238,6 +238,7 @@ def step_report(
     duration: int,
     status: str,
     error: Optional[str] = None,
+    cost_metadata: Optional[dict] = None,
 ) -> None:
     _log("8/8", f"Reporting {status}")
     yt_url = None
@@ -260,6 +261,8 @@ def step_report(
         payload["r2_key"] = r2_key
     if error:
         payload["error_message"] = error
+    if cost_metadata:
+        payload["metadata"] = cost_metadata
 
     try:
         resp = requests.post(
@@ -336,7 +339,7 @@ def main() -> None:
         script = step_generate_script(topic)
 
         current_step = "generate-audio"
-        audio_path, word_timestamps, audio_duration = step_generate_audio(script, work_dir)
+        audio_path, word_timestamps, audio_duration, audio_usage = step_generate_audio(script, work_dir)
         duration = int(audio_duration)
 
         current_step = "generate-clips"
@@ -355,7 +358,36 @@ def main() -> None:
         youtube_id = step_upload_youtube(video_path, script)
 
         current_step = "report"
-        step_report(topic, script, youtube_id, r2_key, duration, "published")
+        # Build cost breakdown
+        script_usage = script.get("_usage", {})
+        kling_cost = len(clip_paths) * 0.70  # $0.07/s × 10s × N clips
+        total_cost = (
+            script_usage.get("claude_cost_usd", 0)
+            + audio_usage.get("elevenlabs_cost_usd", 0)
+            + kling_cost
+        )
+        cost_metadata = {
+            "claude": {
+                "input_tokens": script_usage.get("input_tokens", 0),
+                "output_tokens": script_usage.get("output_tokens", 0),
+                "cost_usd": script_usage.get("claude_cost_usd", 0),
+            },
+            "elevenlabs": {
+                "chars": audio_usage.get("chars", 0),
+                "cost_usd": audio_usage.get("elevenlabs_cost_usd", 0),
+            },
+            "kling": {
+                "clips": len(clip_paths),
+                "cost_usd": round(kling_cost, 4),
+            },
+            "total_usd": round(total_cost, 4),
+        }
+        print(f"\n  Cost breakdown:")
+        print(f"    Claude     : ${script_usage.get('claude_cost_usd', 0):.4f}")
+        print(f"    ElevenLabs : ${audio_usage.get('elevenlabs_cost_usd', 0):.4f}")
+        print(f"    Kling      : ${kling_cost:.4f} ({len(clip_paths)} clips)")
+        print(f"    Total      : ${total_cost:.4f}")
+        step_report(topic, script, youtube_id, r2_key, duration, "published", cost_metadata=cost_metadata)
 
         print("\n" + "=" * 60)
         print("✓ Pipeline complete!")

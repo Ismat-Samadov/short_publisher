@@ -89,10 +89,15 @@ def generate_audio(
 
     duration = word_timestamps[-1]["end"] if word_timestamps else _estimate_duration(script)
 
+    # ElevenLabs Starter: ~$0.0002/char (conservative estimate across plans)
+    char_count = len(script)
+    elevenlabs_cost = char_count * 0.0002
+
     print(f"  Duration : {duration:.1f}s")
     print(f"  Caption words: {len(word_timestamps)}")
+    print(f"  Chars    : {char_count} (${elevenlabs_cost:.4f})")
 
-    return word_timestamps, duration
+    return word_timestamps, duration, {"chars": char_count, "elevenlabs_cost_usd": round(elevenlabs_cost, 6)}
 
 
 def _chars_to_words(

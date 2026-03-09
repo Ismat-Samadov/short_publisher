@@ -239,7 +239,10 @@ export default function TopicsPage() {
                       <select
                         value={topic.status}
                         onChange={(e) => handleStatusChange(topic.id, e.target.value as Topic['status'])}
-                        className="opacity-0 group-hover:opacity-100 text-[10px] bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-zinc-400 focus:outline-none transition-opacity cursor-pointer"
+                        className={cn(
+                          'text-[10px] bg-zinc-800 border border-zinc-700 rounded px-1 py-0.5 text-zinc-400 focus:outline-none transition-opacity cursor-pointer',
+                          topic.status === 'processing' ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+                        )}
                       >
                         {(['queued', 'processing', 'used', 'skipped'] as Topic['status'][]).map((s) => (
                           <option key={s} value={s} style={{ background: '#18181b' }}>

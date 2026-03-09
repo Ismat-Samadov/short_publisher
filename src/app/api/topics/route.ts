@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, topics } from '@/lib/db/schema';
-import { desc, eq, asc } from 'drizzle-orm';
+import { desc, eq, asc, sql } from 'drizzle-orm';
 import { z } from 'zod';
+
+// processing → queued → skipped → used (active work first, done last)
+const STATUS_ORDER = sql`CASE status
+  WHEN 'processing' THEN 0
+  WHEN 'queued'     THEN 1
+  WHEN 'skipped'    THEN 2
+  WHEN 'used'       THEN 3
+  ELSE 4 END`;
 
 const createTopicSchema = z.object({
   title: z.string().min(1),
@@ -28,7 +36,7 @@ export async function GET(req: NextRequest) {
     }
 
     const results = await query
-      .orderBy(desc(topics.priority), asc(topics.created_at));
+      .orderBy(STATUS_ORDER, desc(topics.priority), asc(topics.created_at));
 
     return NextResponse.json(results);
   } catch (error) {
