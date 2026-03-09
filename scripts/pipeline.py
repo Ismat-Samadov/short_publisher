@@ -368,8 +368,8 @@ def main() -> None:
         current_step = "report"
         # Build cost breakdown
         script_usage = script.get("_usage", {})
-        # Bill on attempted clips (fal.ai charges even for failed generations)
-        kling_cost = clips_attempted * 0.70  # $0.07/s × 10s × N attempted
+        # fal.ai bills 20s minimum per Kling v2.6 pro request regardless of CLIP_DURATION
+        kling_cost = clips_attempted * 1.40  # $0.07/s × 20s × N attempted
         total_cost = (
             script_usage.get("claude_cost_usd", 0)
             + audio_usage.get("elevenlabs_cost_usd", 0)
@@ -416,7 +416,7 @@ def main() -> None:
         if topic:
             # Build partial cost metadata — captures whatever was already billed
             script_usage = (script or {}).get("_usage", {})
-            kling_cost = clips_attempted * 0.70
+            kling_cost = clips_attempted * 1.40
             partial_cost = {
                 "claude": {
                     "input_tokens": script_usage.get("input_tokens", 0),

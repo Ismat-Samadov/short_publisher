@@ -7,7 +7,7 @@ Clips are generated in parallel to minimize total pipeline time.
 Model: fal-ai/kling-video/v2.6/pro/text-to-video
 - 1080x1920, photorealistic, cinematic
 - 10 seconds per clip
-- ~$0.70 per clip (10s × $0.07/s)
+- ~$1.40 per clip (20s minimum billing × $0.07/s on Kling v2.6 pro)
 """
 
 import os
@@ -18,7 +18,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 FAL_MODEL = "fal-ai/kling-video/v2.6/pro/text-to-video"
-CLIP_DURATION = "10"  # seconds per clip — max quality at this length
+CLIP_DURATION = "10"  # fal.ai bills 20s min per call — keep "10" until we verify "20" is valid for Kling v2.6 pro
 
 
 def generate_video_clips(
@@ -36,7 +36,7 @@ def generate_video_clips(
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     total = len(visual_prompts)
     print(f"  Generating {total} clips in parallel (Kling 2.5 Pro, 10s each)...")
-    print(f"  Estimated cost: ~${total * 0.70:.2f}")
+    print(f"  Estimated cost: ~${total * 1.40:.2f}")
 
     results: dict[int, str] = {}
 
