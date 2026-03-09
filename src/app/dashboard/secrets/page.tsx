@@ -190,12 +190,6 @@ export default function SecretsPage() {
   const fetchSecrets = useCallback(async () => {
     setLoading(true);
     try {
-      // Read current stored secrets — we get back masked values where set
-      const res = await fetch('/api/secrets', {
-        headers: { 'x-pipeline-key': '' }, // will fail auth — use session instead
-      });
-      // The GET endpoint requires pipeline key; for dashboard we read settings directly via a different approach
-      // Instead, fetch the settings and filter secret_ prefix
       const settingsRes = await fetch('/api/settings');
       if (settingsRes.ok) {
         const all: { key: string; value: string }[] = await settingsRes.json();
