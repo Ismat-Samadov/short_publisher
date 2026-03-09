@@ -4,7 +4,7 @@ import { eq } from 'drizzle-orm';
 import { validatePipelineKey } from '@/lib/auth';
 import { sendVideoPublished, sendPipelineError } from '@/lib/telegram';
 import { sendVideoPublishedEmail, sendPipelineErrorEmail } from '@/lib/email';
-import { getR2Url } from '@/lib/r2';
+import { getR2UrlSync } from '@/lib/r2';
 import { z } from 'zod';
 
 const completeSchema = z.object({
@@ -89,7 +89,7 @@ export async function POST(req: NextRequest) {
 
     // Send notifications gated on dashboard toggles — failures are non-fatal
     if (status === 'published' && youtube_url && title) {
-      const thumbnailUrl = thumbnail_r2_key ? getR2Url(thumbnail_r2_key) : undefined;
+      const thumbnailUrl = thumbnail_r2_key ? getR2UrlSync(thumbnail_r2_key) : undefined;
       const notifs: Promise<unknown>[] = [];
       if (flag('notify_on_success')) notifs.push(sendVideoPublished(title, youtube_url, thumbnailUrl));
       if (flag('email_on_publish')) notifs.push(sendVideoPublishedEmail(title, youtube_url, duration_seconds ?? undefined, topicRow?.niche ?? undefined));

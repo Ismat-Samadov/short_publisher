@@ -5,27 +5,54 @@ import {
   ListObjectsV2Command,
   HeadObjectCommand,
 } from '@aws-sdk/client-s3';
-
-const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID!;
-const R2_ACCESS_KEY_ID = process.env.R2_ACCESS_KEY_ID!;
-const R2_SECRET_ACCESS_KEY = process.env.R2_SECRET_ACCESS_KEY!;
-const R2_BUCKET_NAME = process.env.R2_BUCKET_NAME!;
-const R2_PUBLIC_URL = process.env.R2_PUBLIC_URL!;
-
-const r2Client = new S3Client({
-  region: 'auto',
-  endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-  credentials: {
-    accessKeyId: R2_ACCESS_KEY_ID,
-    secretAccessKey: R2_SECRET_ACCESS_KEY,
-  },
-});
+import { getSecret } from './secrets';
 
 export interface R2File {
   key: string;
   size: number;
   lastModified: string;
   url: string;
+}
+
+/** Build an S3Client using secrets (env → DB fallback). */
+async function getClient() {
+  const accountId   = await getSecret('R2_ACCOUNT_ID');
+  const accessKeyId = await getSecret('R2_ACCESS_KEY_ID');
+  const secretKey   = await getSecret('R2_SECRET_ACCESS_KEY');
+
+  if (!accountId || !accessKeyId || !secretKey) {
+    throw new Error('R2 credentials not configured. Add R2_ACCOUNT_ID, R2_ACCESS_KEY_ID and R2_SECRET_ACCESS_KEY in Dashboard → Secrets.');
+  }
+
+  return new S3Client({
+    region: 'auto',
+    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
+    credentials: { accessKeyId, secretAccessKey: secretKey },
+  });
+}
+
+async function getBucket() {
+  const bucket = await getSecret('R2_BUCKET_NAME');
+  if (!bucket) throw new Error('R2_BUCKET_NAME not configured.');
+  return bucket;
+}
+
+/**
+ * Return the public URL for an R2 object.
+ * Reads R2_PUBLIC_URL from env or DB.
+ */
+export async function getR2Url(key: string): Promise<string> {
+  const base = (await getSecret('R2_PUBLIC_URL')).replace(/\/$/, '');
+  return `${base}/${key}`;
+}
+
+/**
+ * Sync version for callers that already have the public URL base in env
+ * (kept for backwards-compatibility with pipeline-side code).
+ */
+export function getR2UrlSync(key: string): string {
+  const base = (process.env.R2_PUBLIC_URL ?? '').replace(/\/$/, '');
+  return `${base}/${key}`;
 }
 
 /**
@@ -36,35 +63,17 @@ export async function uploadToR2(
   body: Buffer | Uint8Array,
   contentType: string
 ): Promise<string> {
-  const command = new PutObjectCommand({
-    Bucket: R2_BUCKET_NAME,
-    Key: key,
-    Body: body,
-    ContentType: contentType,
-  });
-
-  await r2Client.send(command);
+  const [client, bucket] = await Promise.all([getClient(), getBucket()]);
+  await client.send(new PutObjectCommand({ Bucket: bucket, Key: key, Body: body, ContentType: contentType }));
   return getR2Url(key);
-}
-
-/**
- * Return the public URL for an R2 object.
- */
-export function getR2Url(key: string): string {
-  const base = R2_PUBLIC_URL.replace(/\/$/, '');
-  return `${base}/${key}`;
 }
 
 /**
  * Delete an object from R2.
  */
 export async function deleteFromR2(key: string): Promise<void> {
-  const command = new DeleteObjectCommand({
-    Bucket: R2_BUCKET_NAME,
-    Key: key,
-  });
-
-  await r2Client.send(command);
+  const [client, bucket] = await Promise.all([getClient(), getBucket()]);
+  await client.send(new DeleteObjectCommand({ Bucket: bucket, Key: key }));
 }
 
 /**
@@ -75,32 +84,34 @@ export async function listR2Files(
   prefix?: string,
   continuationToken?: string
 ): Promise<{ files: R2File[]; nextToken?: string; isTruncated: boolean }> {
-  const command = new ListObjectsV2Command({
-    Bucket: R2_BUCKET_NAME,
+  const [client, bucket, publicUrl] = await Promise.all([
+    getClient(),
+    getBucket(),
+    getSecret('R2_PUBLIC_URL'),
+  ]);
+  const base = publicUrl.replace(/\/$/, '');
+
+  const resp = await client.send(new ListObjectsV2Command({
+    Bucket: bucket,
     Prefix: prefix ?? '',
     MaxKeys: 200,
     ContinuationToken: continuationToken,
-  });
+  }));
 
-  const resp = await r2Client.send(command);
   const files: R2File[] = (resp.Contents ?? []).map((obj) => ({
     key: obj.Key!,
     size: obj.Size ?? 0,
     lastModified: obj.LastModified?.toISOString() ?? '',
-    url: getR2Url(obj.Key!),
+    url: `${base}/${obj.Key!}`,
   }));
 
-  return {
-    files,
-    nextToken: resp.NextContinuationToken,
-    isTruncated: resp.IsTruncated ?? false,
-  };
+  return { files, nextToken: resp.NextContinuationToken, isTruncated: resp.IsTruncated ?? false };
 }
 
 /**
- * Get metadata for a single R2 object (size, content type, last modified).
+ * Get metadata for a single R2 object.
  */
 export async function headR2File(key: string) {
-  const command = new HeadObjectCommand({ Bucket: R2_BUCKET_NAME, Key: key });
-  return r2Client.send(command);
+  const [client, bucket] = await Promise.all([getClient(), getBucket()]);
+  return client.send(new HeadObjectCommand({ Bucket: bucket, Key: key }));
 }

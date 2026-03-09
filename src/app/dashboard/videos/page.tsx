@@ -176,7 +176,6 @@ export default function VideosPage() {
   }
 
   const publishedCount = videos.filter((v) => v.status === 'published').length;
-  const failedCount    = videos.filter((v) => v.status === 'failed').length;
   const totalSpent     = videos.reduce((sum, v) => {
     const cost = v.metadata as CostMeta | null;
     return sum + (cost?.total_usd ?? 0);
@@ -219,8 +218,6 @@ export default function VideosPage() {
       <div className="flex items-center gap-4 flex-wrap justify-between">
         <div className="flex items-center gap-3 text-xs text-zinc-500">
           <span><span className="text-emerald-400 font-semibold">{publishedCount}</span> published</span>
-          <span className="text-zinc-800">·</span>
-          <span><span className="text-red-400 font-semibold">{failedCount}</span> failed</span>
           <span className="text-zinc-800">·</span>
           <span><span className="text-zinc-300 font-semibold">{videos.length}</span> total</span>
           {totalSpent > 0 && (

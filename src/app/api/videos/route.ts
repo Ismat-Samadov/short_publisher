@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db, videos, topics } from '@/lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, eq, ne } from 'drizzle-orm';
 
 export async function GET(req: NextRequest) {
   try {
@@ -11,22 +11,17 @@ export async function GET(req: NextRequest) {
 
     if (status) {
       results = await db
-        .select({
-          video: videos,
-          topic: topics,
-        })
+        .select({ video: videos, topic: topics })
         .from(videos)
         .leftJoin(topics, eq(videos.topic_id, topics.id))
         .where(eq(videos.status, status as 'pending' | 'generating' | 'uploading' | 'published' | 'failed'))
         .orderBy(desc(videos.created_at));
     } else {
       results = await db
-        .select({
-          video: videos,
-          topic: topics,
-        })
+        .select({ video: videos, topic: topics })
         .from(videos)
         .leftJoin(topics, eq(videos.topic_id, topics.id))
+        .where(ne(videos.status, 'failed'))
         .orderBy(desc(videos.created_at));
     }
 
