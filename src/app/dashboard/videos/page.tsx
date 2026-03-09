@@ -86,9 +86,9 @@ function CostCell({
     try {
       const costPayload: CostMeta = {
         total_usd: total,
-        claude:     { cost_usd: parseFloat(fields.claude) || 0, ...(cost?.claude ?? {}) },
-        elevenlabs: { cost_usd: parseFloat(fields.elevenlabs) || 0, ...(cost?.elevenlabs ?? {}) },
-        kling:      { cost_usd: parseFloat(fields.kling) || 0, ...(cost?.kling ?? {}) },
+        claude:     { ...(cost?.claude ?? {}), cost_usd: parseFloat(fields.claude) || 0 },
+        elevenlabs: { ...(cost?.elevenlabs ?? {}), cost_usd: parseFloat(fields.elevenlabs) || 0 },
+        kling:      { ...(cost?.kling ?? {}), cost_usd: parseFloat(fields.kling) || 0 },
       };
       const res = await fetch(`/api/videos/${videoId}`, {
         method: 'PATCH',
