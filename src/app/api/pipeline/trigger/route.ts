@@ -1,13 +1,18 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSecret } from '@/lib/secrets';
 
 export async function POST(req: NextRequest) {
-  const githubToken = process.env.GH_TOKEN;
-  const githubRepo = process.env.GH_REPO;
-  const workflowFile = process.env.GH_WORKFLOW_FILE ?? 'publish.yml';
+  const [githubToken, githubRepo, workflowFile] = await Promise.all([
+    getSecret('GH_TOKEN'),
+    getSecret('GH_REPO'),
+    getSecret('GH_WORKFLOW_FILE'),
+  ]);
+
+  const workflow = workflowFile || 'publish.yml';
 
   if (!githubToken || !githubRepo) {
     return NextResponse.json(
-      { error: 'GH_TOKEN and GH_REPO env vars are required' },
+      { error: 'GH_TOKEN and GH_REPO are not configured. Set them in Dashboard → Secrets.' },
       { status: 503 }
     );
   }
@@ -17,7 +22,7 @@ export async function POST(req: NextRequest) {
     const dryRun = body.dry_run === true || body.dry_run === 'true';
 
     const response = await fetch(
-      `https://api.github.com/repos/${githubRepo}/actions/workflows/${workflowFile}/dispatches`,
+      `https://api.github.com/repos/${githubRepo}/actions/workflows/${workflow}/dispatches`,
       {
         method: 'POST',
         headers: {
@@ -26,10 +31,7 @@ export async function POST(req: NextRequest) {
           'X-GitHub-Api-Version': '2022-11-28',
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          ref: 'main',
-          inputs: { dry_run: String(dryRun) },
-        }),
+        body: JSON.stringify({ ref: 'main', inputs: { dry_run: String(dryRun) } }),
       }
     );
 

@@ -43,6 +43,60 @@ HEADERS = {
 }
 
 
+def load_secrets_from_dashboard() -> None:
+    """
+    Fetch all secrets stored in the dashboard DB and inject them into os.environ.
+    This means GitHub Actions only needs APP_URL + PIPELINE_SECRET_KEY.
+    Everything else (API keys, tokens) is managed from the admin panel.
+    """
+    try:
+        resp = requests.get(
+            f"{APP_URL}/api/secrets",
+            headers=HEADERS,
+            timeout=15,
+        )
+        if not resp.ok:
+            print(f"[Secrets] Failed to load from dashboard ({resp.status_code}). Using local env vars.")
+            return
+        secrets = resp.json()
+        loaded = 0
+        for key, value in secrets.items():
+            if value and not os.environ.get(key):  # env var overrides DB (local dev)
+                os.environ[key] = value
+                loaded += 1
+        print(f"[Secrets] Loaded {loaded} secrets from dashboard DB.")
+    except Exception as e:
+        print(f"[Secrets] Could not reach dashboard ({e}). Falling back to local env vars.")
+
+
+def fetch_pipeline_config() -> dict:
+    """Fetch dashboard settings (non-secret config) at startup."""
+    defaults = {
+        "youtube_visibility": "public",
+        "youtube_category_id": "28",
+        "youtube_made_for_kids": "false",
+        "video_duration_target": "55",
+        "script_tone": "educational",
+        "default_niche": "Technology",
+        "elevenlabs_voice_id": "",
+    }
+    try:
+        resp = requests.get(
+            f"{APP_URL}/api/settings/pipeline",
+            headers=HEADERS,
+            timeout=10,
+        )
+        if resp.ok:
+            return {**defaults, **resp.json()}
+    except Exception as e:
+        print(f"[Config] Could not fetch dashboard settings ({e}), using defaults.")
+    return defaults
+
+
+# Loaded once at startup
+CONFIG: dict = {}
+
+
 # ── Data classes ─────────────────────────────────────────────────────────────
 
 @dataclass
@@ -79,12 +133,15 @@ def step_fetch_topic() -> Topic:
 
 
 def step_generate_script(topic: Topic) -> dict:
-    _log("2/8", "Generating viral script (Claude claude-sonnet-4-6)")
+    tone = CONFIG.get("script_tone", "educational")
+    niche = topic.niche or CONFIG.get("default_niche", "Technology")
+    _log("2/8", f"Generating viral script (Claude claude-sonnet-4-6) tone={tone}")
     return generate_script(
         topic_title=topic.title,
         topic_description=topic.description,
-        niche=topic.niche,
+        niche=niche,
         keywords=topic.keywords,
+        tone=tone,
     )
 
 
@@ -152,12 +209,21 @@ def step_upload_youtube(video_path: str, script: dict) -> str:
     if DRY_RUN:
         _log("7/8", "YouTube upload — SKIPPED (dry run)")
         return "dry_run_id"
-    _log("7/8", "Uploading to YouTube")
+
+    visibility = CONFIG.get("youtube_visibility", "public")
+    category_id = CONFIG.get("youtube_category_id", "28")
+    made_for_kids_raw = CONFIG.get("youtube_made_for_kids", "false")
+    made_for_kids = made_for_kids_raw.lower() == "true"
+
+    _log("7/8", f"Uploading to YouTube (visibility={visibility}, category={category_id})")
     return upload_to_youtube(
         video_path=video_path,
         title=script["title"],
         description=script["description"],
         hashtags=script["hashtags"],
+        category_id=category_id,
+        privacy_status=visibility,
+        made_for_kids=made_for_kids,
     )
 
 
@@ -226,10 +292,17 @@ def _log(step: str, msg: str) -> None:
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    global CONFIG
+    # Load secrets from dashboard DB first — this populates os.environ
+    # so all downstream scripts (generate_script, generate_audio, etc.) work
+    load_secrets_from_dashboard()
+    CONFIG = fetch_pipeline_config()
+
     print("=" * 60)
     print(f"Short Publisher Pipeline — {datetime.utcnow().strftime('%Y-%m-%d %H:%M')} UTC")
     if DRY_RUN:
         print("DRY RUN — YouTube upload will be skipped")
+    print(f"Config: visibility={CONFIG.get('youtube_visibility')} | category={CONFIG.get('youtube_category_id')} | tone={CONFIG.get('script_tone')}")
     print("=" * 60)
 
     topic: Optional[Topic] = None

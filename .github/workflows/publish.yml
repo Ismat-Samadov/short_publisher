@@ -36,30 +36,9 @@ jobs:
       - name: Run pipeline
         working-directory: scripts
         env:
+          # Only 2 secrets needed — all API keys are loaded from the dashboard DB at runtime
           APP_URL: ${{ secrets.APP_URL }}
           PIPELINE_SECRET_KEY: ${{ secrets.PIPELINE_SECRET_KEY }}
           DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
-
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-
-          ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
-          ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
-
-          FAL_KEY: ${{ secrets.FAL_KEY }}
-
-          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
-          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
-          R2_PUBLIC_URL: ${{ secrets.R2_PUBLIC_URL }}
-
-          YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
-          YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
-          YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
-
-          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
-          BACKGROUND_MUSIC_URL: ${{ secrets.BACKGROUND_MUSIC_URL }}
 
         run: python pipeline.py

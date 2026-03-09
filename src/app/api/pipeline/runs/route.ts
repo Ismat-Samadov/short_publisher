@@ -1,20 +1,25 @@
 import { NextResponse } from 'next/server';
+import { getSecret } from '@/lib/secrets';
 
 export async function GET() {
-  const githubToken = process.env.GH_TOKEN;
-  const githubRepo = process.env.GH_REPO;
-  const workflowFile = process.env.GH_WORKFLOW_FILE ?? 'publish.yml';
+  const [githubToken, githubRepo, workflowFile] = await Promise.all([
+    getSecret('GH_TOKEN'),
+    getSecret('GH_REPO'),
+    getSecret('GH_WORKFLOW_FILE'),
+  ]);
+
+  const workflow = workflowFile || 'publish.yml';
 
   if (!githubToken || !githubRepo) {
     return NextResponse.json(
-      { error: 'GH_TOKEN and GH_REPO env vars are required', runs: [] },
+      { error: 'GH_TOKEN and GH_REPO are not configured. Set them in Dashboard → Secrets.', runs: [] },
       { status: 503 }
     );
   }
 
   try {
     const response = await fetch(
-      `https://api.github.com/repos/${githubRepo}/actions/workflows/${workflowFile}/runs?per_page=20`,
+      `https://api.github.com/repos/${githubRepo}/actions/workflows/${workflow}/runs?per_page=20`,
       {
         headers: {
           Authorization: `Bearer ${githubToken}`,

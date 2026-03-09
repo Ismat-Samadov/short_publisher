@@ -62,16 +62,28 @@ Return ONLY valid JSON — no markdown, no code fences, nothing else:
 Aim for 6-9 segments. Each segment = ~10-15 seconds of speech."""
 
 
+TONE_INSTRUCTIONS = {
+    "educational": "Teach something surprising. Facts must be accurate. Frame as 'things they don't teach you'.",
+    "entertaining": "Entertain first, inform second. Use humor, absurdity, or storytelling. Hook = unexpected scenario.",
+    "motivational": "Fire them up. Short punchy affirmations. Real stakes. 'You can do this' energy but no cringe.",
+    "news": "Breaking news energy. Urgent, present tense. 'This just changed everything about [X].'",
+}
+
+
 def generate_script(
     topic_title: str,
     topic_description: str | None,
     niche: str | None,
     keywords: list[str],
+    tone: str = "educational",
 ) -> dict:
     client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 
+    tone_note = TONE_INSTRUCTIONS.get(tone, TONE_INSTRUCTIONS["educational"])
+
     user_prompt = f"""Topic: {topic_title}
 Niche: {niche or "general"}
+Tone: {tone} — {tone_note}
 Keywords: {", ".join(keywords) if keywords else "none"}
 Context: {topic_description or "none"}
 

@@ -30,6 +30,7 @@ def upload_to_youtube(
     hashtags: list[str],
     category_id: str = YOUTUBE_CATEGORY_SCIENCE_TECH,
     privacy_status: str = "public",
+    made_for_kids: bool = False,
 ) -> str:
     """
     Upload a video to YouTube and return the video ID.
@@ -74,7 +75,7 @@ def upload_to_youtube(
         },
         "status": {
             "privacyStatus": privacy_status,
-            "selfDeclaredMadeForKids": False,
+            "selfDeclaredMadeForKids": made_for_kids,
         },
     }
 

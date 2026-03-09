@@ -1,25 +1,22 @@
-const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN!;
-const TELEGRAM_CHAT_ID = process.env.TELEGRAM_CHAT_ID!;
+import { getSecret } from './secrets';
 
-const BASE_URL = `https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}`;
-
-/**
- * Send a text message to the configured Telegram chat.
- */
 export async function sendMessage(
   text: string,
   parseMode: 'HTML' | 'Markdown' = 'HTML'
 ): Promise<void> {
-  if (!TELEGRAM_BOT_TOKEN || !TELEGRAM_CHAT_ID) {
+  const token = await getSecret('TELEGRAM_BOT_TOKEN');
+  const chatId = await getSecret('TELEGRAM_CHAT_ID');
+
+  if (!token || !chatId) {
     console.warn('[Telegram] BOT_TOKEN or CHAT_ID not configured, skipping.');
     return;
   }
 
-  const response = await fetch(`${BASE_URL}/sendMessage`, {
+  const response = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      chat_id: TELEGRAM_CHAT_ID,
+      chat_id: chatId,
       text,
       parse_mode: parseMode,
       disable_web_page_preview: false,
@@ -32,9 +29,6 @@ export async function sendMessage(
   }
 }
 
-/**
- * Notify that a video was successfully published.
- */
 export async function sendVideoPublished(
   videoTitle: string,
   youtubeUrl: string,
@@ -53,13 +47,7 @@ export async function sendVideoPublished(
   await sendMessage(text, 'HTML');
 }
 
-/**
- * Notify about a pipeline error.
- */
-export async function sendPipelineError(
-  step: string,
-  error: string
-): Promise<void> {
+export async function sendPipelineError(step: string, error: string): Promise<void> {
   const text = [
     '❌ <b>Pipeline Error</b>',
     '',
@@ -70,18 +58,14 @@ export async function sendPipelineError(
   await sendMessage(text, 'HTML');
 }
 
-/**
- * Send an approval request with script preview.
- */
 export async function sendApprovalRequest(
   topicTitle: string,
   script: string,
   approvalToken: string
 ): Promise<void> {
-  const appUrl = process.env.APP_URL ?? '';
+  const appUrl = await getSecret('APP_URL');
   const approveUrl = `${appUrl}/api/approve?token=${approvalToken}&action=approve`;
   const rejectUrl = `${appUrl}/api/approve?token=${approvalToken}&action=reject`;
-
   const preview = script.length > 400 ? script.slice(0, 400) + '…' : script;
 
   const text = [
