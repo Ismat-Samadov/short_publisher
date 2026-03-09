@@ -3,12 +3,12 @@ import { db, topics } from '@/lib/db/schema';
 import { desc, eq, asc, sql } from 'drizzle-orm';
 import { z } from 'zod';
 
-// processing → queued → skipped → used (active work first, done last)
+// used → processing → queued → skipped (completed first)
 const STATUS_ORDER = sql`CASE status
-  WHEN 'processing' THEN 0
-  WHEN 'queued'     THEN 1
-  WHEN 'skipped'    THEN 2
-  WHEN 'used'       THEN 3
+  WHEN 'used'        THEN 0
+  WHEN 'processing'  THEN 1
+  WHEN 'queued'      THEN 2
+  WHEN 'skipped'     THEN 3
   ELSE 4 END`;
 
 const createTopicSchema = z.object({
