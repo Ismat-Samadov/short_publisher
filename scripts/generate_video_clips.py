@@ -1,13 +1,13 @@
 """
 generate_video_clips.py
 
-Generates cinematic 9:16 video clips using Kling 2.5 Pro via fal.ai.
+Generates cinematic 9:16 video clips using Kling 2.6 Pro via fal.ai.
 Clips are generated in parallel to minimize total pipeline time.
 
-Model: fal-ai/kling-video/v2.5/pro/text-to-video
+Model: fal-ai/kling-video/v2.6/pro/text-to-video
 - 1080x1920, photorealistic, cinematic
 - 10 seconds per clip
-- ~$0.29 per clip (10s × $0.029/s)
+- ~$0.70 per clip (10s × $0.07/s)
 """
 
 import os
@@ -17,7 +17,7 @@ from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
-FAL_MODEL = "fal-ai/kling-video/v2.5/pro/text-to-video"
+FAL_MODEL = "fal-ai/kling-video/v2.6/pro/text-to-video"
 CLIP_DURATION = "10"  # seconds per clip — max quality at this length
 
 
@@ -36,7 +36,7 @@ def generate_video_clips(
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     total = len(visual_prompts)
     print(f"  Generating {total} clips in parallel (Kling 2.5 Pro, 10s each)...")
-    print(f"  Estimated cost: ~${total * 0.29:.2f}")
+    print(f"  Estimated cost: ~${total * 0.70:.2f}")
 
     results: dict[int, str] = {}
 
