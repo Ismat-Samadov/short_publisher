@@ -133,7 +133,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
         {statCards.map(({ label, value, sub, icon: Icon, accent, accentBg, accentBorder }) => (
           <div
             key={label}
@@ -165,11 +165,11 @@ export default async function DashboardPage() {
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
         {/* Recent Videos — 2/3 */}
         <div
-          className="lg:col-span-2 rounded-xl overflow-hidden"
+          className="md:col-span-2 rounded-xl overflow-hidden"
           style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}
         >
           <div

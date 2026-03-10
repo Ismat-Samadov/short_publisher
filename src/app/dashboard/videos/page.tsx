@@ -417,7 +417,7 @@ function InsightCards({ videos }: { videos: Video[] }) {
   const h12 = h % 12 || 12;
 
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
       <InsightCard
         icon={<BarChart2 className="w-3.5 h-3.5 text-violet-400" />}
         label="Avg engagement rate"

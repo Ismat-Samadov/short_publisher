@@ -262,7 +262,7 @@ export default function LandingPage() {
       {/* ── Stats ── */}
       <section className="px-6 sm:px-10 pb-24">
         <div className="max-w-5xl mx-auto">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {stats.map(({ value, label, sub }) => (
               <div key={label} className="rounded-2xl p-5 text-center"
                 style={{ background: 'var(--surface)', border: '1px solid var(--border)' }}>
