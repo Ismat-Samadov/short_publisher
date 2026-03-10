@@ -1,6 +1,6 @@
 export const dynamic = 'force-dynamic';
 
-import { db, videos, topics } from '@/lib/db/schema';
+import { db, videos, topics, settings } from '@/lib/db/schema';
 import { desc, eq, gte, count, and } from 'drizzle-orm';
 import { formatDistanceToNow } from 'date-fns';
 import Link from 'next/link';
@@ -67,11 +67,17 @@ async function getQueuePreview() {
     .limit(4);
 }
 
+async function getScheduleEnabled(): Promise<boolean> {
+  const row = await db.select().from(settings).where(eq(settings.key, 'schedule_enabled')).limit(1);
+  return row.length === 0 || row[0].value !== 'false';
+}
+
 export default async function DashboardPage() {
-  const [stats, recentVideos, queuePreview] = await Promise.all([
+  const [stats, recentVideos, queuePreview, scheduleEnabled] = await Promise.all([
     getStats(),
     getRecentVideos(),
     getQueuePreview(),
+    getScheduleEnabled(),
   ]);
 
   const statCards = [
@@ -123,13 +129,26 @@ export default async function DashboardPage() {
           </div>
           <h1 className="text-[22px] font-bold text-zinc-100 tracking-tight">Dashboard</h1>
         </div>
-        <Link
-          href="/dashboard/pipeline"
-          className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white gradient-accent glow-accent hover:opacity-90 transition-opacity"
-        >
-          <PlayCircle className="w-3.5 h-3.5" />
-          Run Pipeline
-        </Link>
+        <div className="flex items-center gap-2">
+          <Link
+            href="/dashboard/pipeline"
+            className={
+              scheduleEnabled
+                ? 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-emerald-300 border border-emerald-800/50 bg-emerald-950/40'
+                : 'flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium text-red-400 border border-red-800/50 bg-red-950/40'
+            }
+          >
+            <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${scheduleEnabled ? 'bg-emerald-400 animate-pulse-dot' : 'bg-red-500'}`} />
+            {scheduleEnabled ? 'Auto-publish on' : 'Auto-publish off'}
+          </Link>
+          <Link
+            href="/dashboard/pipeline"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold text-white gradient-accent glow-accent hover:opacity-90 transition-opacity"
+          >
+            <PlayCircle className="w-3.5 h-3.5" />
+            Run Pipeline
+          </Link>
+        </div>
       </div>
 
       {/* Stat Cards */}
