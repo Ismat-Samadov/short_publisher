@@ -33,13 +33,13 @@
 
 ---
 
-### 3. fal.ai (Kling 2.5 Pro video generation)
+### 3. fal.ai (Kling 2.6 Pro video generation)
 | | |
 |---|---|
-| **Used for** | Generating cinematic 9:16 video clips from text prompts (Kling 2.5 Pro model) |
+| **Used for** | Generating cinematic 9:16 video clips from text prompts (Kling 2.6 Pro model) |
 | **Sign up** | [fal.ai](https://fal.ai) |
 | **Key needed** | `FAL_KEY` |
-| **Cost** | **$1.40 per clip** (Kling bills 20s minimum per generation regardless of length). Default 3 clips = $4.20 |
+| **Cost** | **$1.40 per clip** (Kling 2.6 Pro bills 20s minimum per generation regardless of clip length). Default 3 clips = $4.20 |
 | **Free tier** | $2 free credit on signup |
 | **Notes** | This is the dominant cost per video. Reduce `max_clips` in Settings to lower cost. Up to 4 clips are generated in parallel. |
 
@@ -121,7 +121,7 @@
 
 | Service | Cost per video | Notes |
 |---------|---------------|-------|
-| Kling 2.5 Pro (fal.ai) | ~$4.20 | 3 clips × $1.40 (dominant cost) |
+| Kling 2.6 Pro (fal.ai) | ~$4.20 | 3 clips × $1.40 (dominant cost) |
 | ElevenLabs | ~$0.30–0.50 | Depends on script length |
 | Claude | ~$0.005–0.01 | Very cheap |
 | R2 storage | ~$0.001 | Negligible |

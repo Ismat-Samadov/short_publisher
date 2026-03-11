@@ -158,10 +158,11 @@ This is a one-time step to connect your YouTube channel. You need Python install
 
 ### Run the token helper script
 
-In the project root, install the required Python packages:
+The script uses only Python stdlib — no extra packages needed. First, make sure your `.env.local` has:
 
 ```bash
-pip install google-auth-oauthlib google-auth-httplib2 google-api-python-client
+YOUTUBE_CLIENT_ID=your-client-id
+YOUTUBE_CLIENT_SECRET=your-client-secret
 ```
 
 Then run:
@@ -171,13 +172,13 @@ cd scripts
 python get_youtube_token.py
 ```
 
-It will open a browser window. Log in with the Google account that owns your YouTube channel and grant permission. After completing the flow, the script prints:
+It will open a browser window. Log in with the Google account that owns your YouTube channel and grant permission. After completing the OAuth flow, the script automatically writes the token into your `.env.local`:
 
 ```
-Refresh token: 1//0xxxxxxxxxxxxxxxxx...
+Done! YOUTUBE_REFRESH_TOKEN written to .env.local
 ```
 
-Copy that token. You'll enter it in the dashboard in the next step.
+Open `.env.local` and copy the `YOUTUBE_REFRESH_TOKEN` value. You'll enter it in the dashboard in the next step.
 
 ---
 

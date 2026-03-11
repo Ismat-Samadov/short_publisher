@@ -4,7 +4,7 @@ pipeline.py — YouTube Shorts autonomous publisher
 Stack:
   Script  : Claude claude-sonnet-4-6 (hook-first viral formula)
   Audio   : ElevenLabs (premium voice + word timestamps for captions)
-  Video   : Kling 2.5 Pro via fal.ai (cinematic 9:16, parallel generation)
+  Video   : Kling 2.6 Pro via fal.ai (cinematic 9:16, parallel generation)
   Assembly: FFmpeg (normalize + concat + audio mix + burned ASS captions)
   Upload  : YouTube Data API v3
 
@@ -159,7 +159,7 @@ def step_generate_audio(script: dict, work_dir: str) -> tuple[str, list[dict], f
 
 
 def step_generate_clips(script: dict, work_dir: str) -> tuple[list[str], int]:
-    _log("4/8", "Generating cinematic clips (Kling 2.5 Pro via fal.ai)")
+    _log("4/8", "Generating cinematic clips (Kling 2.6 Pro via fal.ai)")
     clips_dir = str(Path(work_dir) / "clips")
     prompts = [seg["visual_prompt"] for seg in script["segments"]]
     clip_paths = generate_video_clips(prompts, clips_dir)

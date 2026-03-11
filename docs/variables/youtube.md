@@ -72,21 +72,26 @@ python scripts/get_youtube_token.py
 
 What happens:
 1. The script starts a local web server on port 8080
-2. It prints an authorization URL — open it in your browser
+2. It opens your browser with a Google authorization URL
 3. Log in with the **Google account that owns your YouTube channel**
 4. Grant permission to "manage your YouTube account"
 5. Google redirects to `localhost:8080` — the script captures the token automatically
-6. The script prints: `YOUTUBE_REFRESH_TOKEN=1//0c...`
+6. The script writes the token directly into `.env.local` and prints:
+   ```
+   Done! YOUTUBE_REFRESH_TOKEN written to .env.local
+   ```
 
-Copy this token → `YOUTUBE_REFRESH_TOKEN`.
+Open your `.env.local` file and copy the `YOUTUBE_REFRESH_TOKEN` value → paste it into the dashboard.
 
-### If the script fails
+### Prerequisites
 
-Make sure your `.env.local` has:
+Make sure your `.env.local` has the credentials from Step 4 before running the script:
 ```
 YOUTUBE_CLIENT_ID=your-client-id
 YOUTUBE_CLIENT_SECRET=your-client-secret
 ```
+
+The script uses only Python stdlib — no pip install required.
 
 And that port 8080 is not in use:
 ```bash
