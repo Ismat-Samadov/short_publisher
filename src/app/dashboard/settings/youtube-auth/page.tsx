@@ -70,7 +70,7 @@ function YouTubeAuthContent() {
             Create an OAuth consent screen (External, add your Gmail as a test user)
           </li>
           <li>
-            Create OAuth credentials (Desktop app type) and copy the client ID and secret
+            Create OAuth credentials — application type must be <strong className="text-zinc-300">Web application</strong> (not Desktop app)
           </li>
           <li>
             Add <strong className="text-zinc-300">YOUTUBE_CLIENT_ID</strong> and{' '}
@@ -80,11 +80,13 @@ function YouTubeAuthContent() {
             </a>
           </li>
           <li>
-            Add this exact redirect URI to your Google OAuth credentials:
-            <div className="mt-1.5 px-3 py-2 rounded-lg font-mono text-xs text-zinc-300 select-all"
+            In the OAuth credential, under <strong className="text-zinc-300">Authorized redirect URIs</strong>, add this exact URI:
+            <div className="mt-1.5 px-3 py-2 rounded-lg font-mono text-xs text-zinc-300 select-all break-all"
               style={{ background: 'var(--bg)', border: '1px solid var(--border)' }}>
-              {typeof window !== 'undefined' ? window.location.origin : 'https://your-app.vercel.app'}
-              /api/auth/youtube/callback
+              {typeof window !== 'undefined' ? window.location.origin : 'https://your-app.vercel.app'}/api/auth/youtube/callback
+            </div>
+            <div className="mt-1 text-xs text-yellow-600">
+              The URI must match exactly — including protocol (http vs https) and domain.
             </div>
           </li>
         </ol>
