@@ -1,0 +1,85 @@
+@import "tailwindcss";
+
+/* ─── Custom theme ─────────────────────────────────────────────────────────── */
+
+@theme inline {
+  --color-background: #050d0a;
+  --color-foreground: #f5f5f5;
+  --font-sans: system-ui, sans-serif;
+}
+
+/* ─── Base ─────────────────────────────────────────────────────────────────── */
+
+html,
+body {
+  overscroll-behavior: none;
+  touch-action: manipulation;
+  background: radial-gradient(ellipse at top, #0f2318 0%, #050d0a 70%);
+  min-height: 100dvh;
+  color: #f5f5f5;
+}
+
+/* Prevent unwanted text selection during rapid tapping */
+* {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* ─── Keyframe animations ──────────────────────────────────────────────────── */
+
+@keyframes treeshake {
+  0%   { transform: translateX(0); }
+  20%  { transform: translateX(-5px); }
+  40%  { transform: translateX(5px); }
+  60%  { transform: translateX(-3px); }
+  80%  { transform: translateX(3px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes deathshake {
+  0%   { transform: translateX(0) rotate(0deg); }
+  15%  { transform: translateX(-10px) rotate(-4deg); }
+  30%  { transform: translateX(10px) rotate(4deg); }
+  50%  { transform: translateX(-6px) rotate(-2deg); }
+  70%  { transform: translateX(6px) rotate(2deg); }
+  100% { transform: translateX(0) rotate(0deg); }
+}
+
+@keyframes scorepop {
+  0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateX(-50%) translateY(-32px) scale(1.4); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.2; transform: scale(1); }
+  50%       { opacity: 0.8; transform: scale(1.5); }
+}
+
+@keyframes deathfall {
+  0%   { transform: rotate(0deg) translateY(0); opacity: 1; }
+  60%  { transform: rotate(80deg) translateY(-4px); opacity: 0.8; }
+  100% { transform: rotate(90deg) translateY(0); opacity: 0.5; }
+}
+
+/* ─── Animation utility classes ────────────────────────────────────────────── */
+
+.animate-tree-shake {
+  animation: treeshake 0.14s ease-in-out;
+}
+
+.animate-death-shake {
+  animation: deathshake 0.5s ease-in-out;
+}
+
+.animate-score-pop {
+  animation: scorepop 0.45s ease-out forwards;
+}
+
+.animate-twinkle {
+  animation: twinkle 2s ease-in-out infinite;
+}
+
+.animate-death-fall {
+  animation: deathfall 0.5s ease-in-out forwards;
+}
