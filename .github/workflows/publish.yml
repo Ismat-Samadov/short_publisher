@@ -1,0 +1,44 @@
+name: Publish YouTube Short
+
+on:
+  schedule:
+    - cron: '0 9 * * *'       # Daily at 9:00 AM UTC
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 'Dry run — skips YouTube upload, tests everything else'
+        required: false
+        default: 'false'
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg fonts-dejavu-core fonts-open-sans
+
+      - name: Install Python dependencies
+        run: pip install -r scripts/requirements.txt
+
+      - name: Run pipeline
+        working-directory: scripts
+        env:
+          # Only 2 secrets needed — all API keys are loaded from the dashboard DB at runtime
+          APP_URL: ${{ secrets.APP_URL }}
+          PIPELINE_SECRET_KEY: ${{ secrets.PIPELINE_SECRET_KEY }}
+          DRY_RUN: ${{ github.event.inputs.dry_run || 'false' }}
+
+        run: python pipeline.py
