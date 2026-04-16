@@ -2,6 +2,8 @@
 
 Autonomous YouTube Shorts generation and publishing platform. Produces cinematic ~60 second Shorts daily using AI — from topic idea to published video with zero manual intervention.
 
+Generated Shorts: https://www.youtube.com/@ismat-samadov
+
 **Stack:** Next.js 16 · NeonDB · Cloudflare R2 · GitHub Actions · Claude Sonnet · ElevenLabs · Kling 2.6 Pro · FFmpeg · YouTube Data API v3
 
 [![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/Ismat-Samadov/short_publisher&env=DATABASE_URL,PIPELINE_SECRET_KEY,DASHBOARD_PASSWORD,AUTH_TOKEN&envDescription=4%20bootstrap%20variables%20required%20to%20run%20the%20dashboard&envLink=https://github.com/Ismat-Samadov/short_publisher/blob/main/docs/variables/README.md)
